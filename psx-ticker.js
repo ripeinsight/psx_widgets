@@ -4,7 +4,8 @@
  * This script fetches live intraday market data for a specified PSX index
  * from the RipeInsight API and displays it as a scrolling ticker.
  * Elements are arranged horizontally, includes index name in a box,
- * "Source/Powered by" note below the name, and Play/Pause/Forward/Backward buttons with hover pause.
+ * "Source/Powered by" note below the name, and scrolls automatically.
+ * Pause, Back, and Forward buttons have been removed as requested.
  *
  * Usage: Include this script on your page. The index can be specified using
  * a 'data-market' attribute on the script tag (e.g., <script src="psx-ticker.js" data-market="KMIALL"></script>).
@@ -25,7 +26,6 @@
     const DEFAULT_MARKET = 'KSE30';
     const SCROLL_SPEED_PPS = 100; // Pixels per second - adjust to change scroll speed
     const REFRESH_INTERVAL = 60000; // Refresh data every 1 minute (adjust as needed)
-    const STEP_TIME_MS = 1500; // Time in milliseconds to step forward/backward on button click
 
     // Map market symbols to full names (add more as needed)
     const MARKET_NAMES = {
@@ -40,7 +40,6 @@
     let cachedData = null;
     let cacheTimestamp = 0;
     let fetchIntervalId = null;
-    let isPausedByButton = false; // Track if pause is due to button click
 
     // --- Get Market Index from Script Attribute ---
     const scriptTag = document.currentScript;
@@ -64,21 +63,21 @@
         minHeight: '50px', // Adjusted min-height to accommodate two lines on the left
         color: '#333', // Default text color
         display: 'flex', // Use flexbox for layout
-        alignItems: 'center', // Vertically align items in the row (titleArea, ticker, controls)
+        alignItems: 'center', // Vertically align items in the row (titleArea, ticker)
         gap: '10px', // Gap between main flex items
     });
 
     // --- Container for Title and Powered By Note ---
     const titleArea = document.createElement('div');
     titleArea.className = 'ticker-title-area';
-     Object.assign(titleArea.style, {
+    Object.assign(titleArea.style, {
         display: 'flex',
         flexDirection: 'column', // Stack children (title, note) vertically
         alignItems: 'flex-start', // Align title and note to the left
         flexShrink: 0, // Prevent shrinking
         flexGrow: 0, // Prevent growing
-     });
-     container.appendChild(titleArea);
+    });
+    container.appendChild(titleArea);
 
     // --- Add Index Name Display (in a box) ---
     const indexTitle = document.createElement('div');
@@ -105,7 +104,6 @@
         fontSize: '11px', // Slightly smaller font size
         color: '#888', // Muted color
         marginTop: '4px', // Space between title box and note
-        // Removed absolute positioning styles
     });
     titleArea.appendChild(poweredNote); // Add to titleArea
 
@@ -134,7 +132,9 @@
     });
     tickerWrapper.appendChild(ticker); // Append ticker to the wrapper
 
-    // --- Add Navigation Controls ---
+    // --- Navigation Controls (Removed) ---
+    // The following code block for creating controls has been removed:
+    /*
     const controls = document.createElement('div');
     controls.className = 'ticker-controls';
     Object.assign(controls.style, {
@@ -143,77 +143,30 @@
         gap: '5px', // Space between buttons
         flexShrink: 0, // Prevent shrinking
         flexGrow: 0, // Prevent growing
-         alignSelf: 'center', // Vertically center the controls within the container
+        alignSelf: 'center', // Vertically center the controls within the container
     });
-    container.appendChild(controls); // Add directly to container
+    container.appendChild(controls);
 
-    // Backward Button
+    // Backward Button (Removed)
     const backwardButton = document.createElement('button');
-    backwardButton.innerHTML = '&#9664;'; // Left arrow
-    backwardButton.className = 'ticker-backward-button';
-    Object.assign(backwardButton.style, {
-         background: 'none',
-         border: '1px solid #ccc',
-         borderRadius: '4px',
-         padding: '2px 5px',
-         cursor: 'pointer',
-         fontSize: '0.8em',
-         lineHeight: '1',
-         color: '#555',
-         display: 'inline-block'
-    });
+    // ... styling and appending removed ...
     controls.appendChild(backwardButton);
 
-    // Play Button
+    // Play Button (Removed)
     const playButton = document.createElement('button');
-    playButton.innerHTML = '&#9658;'; // Play icon
-    playButton.className = 'ticker-play-button';
-    Object.assign(playButton.style, {
-         background: 'none',
-         border: '1px solid #ccc',
-         borderRadius: '4px',
-         padding: '2px 5px',
-         cursor: 'pointer',
-         fontSize: '0.8em',
-         lineHeight: '1',
-         color: '#555',
-         display: 'none' // Hide initially
-    });
+    // ... styling and appending removed ...
     controls.appendChild(playButton);
 
-    // Pause Button
+    // Pause Button (Removed)
     const pauseButton = document.createElement('button');
-    pauseButton.innerHTML = '&#10074;&#10074;'; // Pause icon
-    pauseButton.className = 'ticker-pause-button';
-     Object.assign(pauseButton.style, {
-         background: 'none',
-         border: '1px solid #ccc',
-         borderRadius: '4px',
-         padding: '2px 5px',
-         cursor: 'pointer',
-         fontSize: '0.8em',
-         lineHeight: '1',
-         color: '#555',
-         display: 'inline-block' // Show initially
-    });
+    // ... styling and appending removed ...
     controls.appendChild(pauseButton);
 
-    // Forward Button
+    // Forward Button (Removed)
     const forwardButton = document.createElement('button');
-    forwardButton.innerHTML = '&#9654;'; // Right arrow
-    forwardButton.className = 'ticker-forward-button';
-    Object.assign(forwardButton.style, {
-         background: 'none',
-         border: '1px solid #ccc',
-         borderRadius: '4px',
-         padding: '2px 5px',
-         cursor: 'pointer',
-         fontSize: '0.8em',
-         lineHeight: '1',
-         color: '#555',
-         display: 'inline-block'
-    });
+    // ... styling and appending removed ...
     controls.appendChild(forwardButton);
+    */
 
 
     // --- Inject Styles ---
@@ -233,52 +186,38 @@
             font-size: 1em; /* Inherit from container */
         }
 
-         .ripeinsight-psx-ticker .ticker-symbol {
+        .ripeinsight-psx-ticker .ticker-symbol {
             font-weight: bold;
             margin-right: 6px;
             color: #000; /* Stronger color for symbol */
         }
 
-         .ripeinsight-psx-ticker .ticker-change {
+        .ripeinsight-psx-ticker .ticker-change {
             margin-left: 6px;
             font-weight: bold;
         }
 
-         .ripeinsight-psx-ticker .ticker-up { color: #00B15D; } /* Green */
-         .ripeinsight-psx-ticker .ticker-down { color: #CD363A; } /* Red */
-         .ripeinsight-psx-ticker .ticker-neutral { color: #888; } /* Gray */
+        .ripeinsight-psx-ticker .ticker-up { color: #00B15D; } /* Green */
+        .ripeinsight-psx-ticker .ticker-down { color: #CD363A; } /* Red */
+        .ripeinsight-psx-ticker .ticker-neutral { color: #888; } /* Gray */
 
-         /* Hover Pause: Pause animation when mouse is over the wrapper */
-         /* Apply !important to override running state, but can be overridden by .is-paused-by-button */
-         .ripeinsight-psx-ticker .ticker-wrapper:hover .ticker {
-            animation-play-state: paused !important;
+        /* Hover Pause: Pause animation when mouse is over the wrapper */
+        .ripeinsight-psx-ticker .ticker-wrapper:hover .ticker {
+            animation-play-state: paused; /* Removed !important as button override is gone */
         }
 
-        /* Button Pause State: Override hover if button has paused it */
-        .ripeinsight-psx-ticker .ticker.is-paused-by-button {
-             animation-play-state: paused !important;
+        /* Removed .is-paused-by-button styles */
+
+        .ripeinsight-psx-ticker .powered-note a {
+            text-decoration: none;
+            color: inherit;
         }
 
-        /* Style for buttons on hover/active */
-        .ripeinsight-psx-ticker .ticker-controls button:hover {
-            border-color: #999;
-            color: #333;
+        .ripeinsight-psx-ticker .powered-note a:hover {
+            text-decoration: underline;
         }
-         .ripeinsight-psx-ticker .ticker-controls button:active {
-            background-color: #eee;
-         }
 
-
-         .ripeinsight-psx-ticker .powered-note a {
-             text-decoration: none;
-             color: inherit;
-         }
-
-         .ripeinsight-psx-ticker .powered-note a:hover {
-             text-decoration: underline;
-         }
-
-         /* Responsive Adjustments */
+        /* Responsive Adjustments */
         @media (max-width: 768px) {
              .ripeinsight-psx-ticker { padding: 6px 8px; gap: 8px; }
              .ripeinsight-psx-ticker .ticker-item { margin-right: 40px; }
@@ -289,13 +228,13 @@
          /* On smaller screens, stack vertically for better usability */
          /* Adjusted breakpoint and styles for the new titleArea */
          @media (max-width: 600px) { /* Adjusted breakpoint */
-             .ripeinsight-psx-ticker { flexDirection: column; alignItems: flex-start; padding: 8px 10px 8px 10px; gap: 8px; } /* More padding bottom to accommodate controls */
-             .ripeinsight-psx-ticker .title-area { flexShrink: 0; flexGrow: 0; width: 100%; alignItems: flex-start; }
-             .ripeinsight-psx-ticker .ticker-index-title { margin-bottom: 4px; font-size: 0.9em; padding: 4px 8px; }
-             .ripeinsight-psx-ticker .powered-note { margin-top: 0; font-size: 11px;} /* Reduce margin when stacked */
-             .ripeinsight-psx-ticker .ticker-wrapper { width: 100%; minWidth: auto; alignSelf: auto;} /* Allow wrapper to take full width, remove center alignment */
-             .ripeinsight-psx-ticker .ticker-controls { alignSelf: flex-end; margin-top: 0; } /* Align controls to the right below the ticker */
-             .ripeinsight-psx-ticker .ticker-item { margin-right: 30px; font-size: 1em; }
+              .ripeinsight-psx-ticker { flexDirection: column; alignItems: flex-start; padding: 8px 10px; gap: 8px; } /* Removed extra bottom padding */
+              .ripeinsight-psx-ticker .title-area { flexShrink: 0; flexGrow: 0; width: 100%; alignItems: flex-start; }
+              .ripeinsight-psx-ticker .ticker-index-title { margin-bottom: 4px; font-size: 0.9em; padding: 4px 8px; }
+              .ripeinsight-psx-ticker .powered-note { margin-top: 0; font-size: 11px;} /* Reduce margin when stacked */
+              .ripeinsight-psx-ticker .ticker-wrapper { width: 100%; minWidth: auto; alignSelf: auto;} /* Allow wrapper to take full width, remove center alignment */
+              /* Removed styles for .ripeinsight-psx-ticker .ticker-controls */
+              .ripeinsight-psx-ticker .ticker-item { margin-right: 30px; font-size: 1em; }
          }
     `;
     document.head.appendChild(styleTag);
@@ -309,73 +248,18 @@
         document.body.appendChild(container);
     }
 
-    // --- Control Button Event Listeners ---
-    playButton.addEventListener('click', () => {
-        console.log('Play button clicked');
-        isPausedByButton = false;
-        ticker.classList.remove('is-paused-by-button');
-        playButton.style.display = 'none';
-        pauseButton.style.display = 'inline-block';
-         // Explicitly resume animation playback
-        const animation = ticker.getAnimations()[0];
-        if (animation) {
-             animation.playState = 'running';
-        }
-    });
+    // --- Control Button Event Listeners (Removed) ---
+    // The following event listeners have been removed:
+    /*
+    playButton.addEventListener('click', () => { ... });
+    pauseButton.addEventListener('click', () => { ... });
+    backwardButton.addEventListener('click', () => { ... });
+    forwardButton.addEventListener('click', () => { ... });
+    */
 
-    pauseButton.addEventListener('click', () => {
-        console.log('Pause button clicked');
-        isPausedByButton = true;
-        ticker.classList.add('is-paused-by-button');
-        playButton.style.display = 'inline-block';
-        pauseButton.style.display = 'none';
-        // Animation state is handled by the CSS class .is-paused-by-button
-    });
-
-     backwardButton.addEventListener('click', () => {
-         console.log('Backward button clicked');
-         const animation = ticker.getAnimations()[0];
-         if (animation) {
-             // Step backward by a defined time
-             let newTime = animation.currentTime - STEP_TIME_MS;
-             // Handle wrapping around to the end of the single loop duration
-             if (newTime < 0) {
-                 newTime = animation.duration + newTime;
-                 // Ensure newTime is not exactly 0 after wrap-around if step is a multiple of duration
-                 if (newTime === animation.duration && STEP_TIME_MS % animation.duration === 0) {
-                     newTime = 0; // Or animation.duration - small epsilon? Let's stick to 0 for simplicity
-                 }
-             }
-              // Clamp to 0 to avoid negative values if animation.currentTime is already very small
-             newTime = Math.max(0, newTime);
-             animation.currentTime = newTime;
-         }
-     });
-
-     forwardButton.addEventListener('click', () => {
-         console.log('Forward button clicked');
-         const animation = ticker.getAnimations()[0];
-         if (animation) {
-             // Step forward by a defined time
-             let newTime = animation.currentTime + STEP_TIME_MS;
-              // Handle wrapping around to the start of the single loop duration
-             if (newTime > animation.duration) {
-                  newTime = newTime - animation.duration;
-                  // Ensure newTime is not exactly duration after wrap-around if step is a multiple of duration
-                   if (newTime === 0 && STEP_TIME_MS % animation.duration === 0) {
-                     newTime = animation.duration; // Or small epsilon? Let's stick to duration
-                   }
-             }
-              // Clamp to duration to avoid values exceeding it
-             newTime = Math.min(animation.duration, newTime);
-             animation.currentTime = newTime;
-         }
-     });
-
-
-    // --- Hover Logic (handled primarily by CSS) ---
+    // --- Hover Logic (Handled by CSS) ---
     // The CSS rule .ticker-wrapper:hover .ticker handles pausing on hover.
-    // The .is-paused-by-button class ensures the button pause overrides hover unpause.
+    // Button pause logic and the associated class have been removed.
 
     /**
      * Renders the stock data into the ticker element.
@@ -387,20 +271,11 @@
         // Stop any existing animation before rendering
         ticker.style.animation = 'none';
         ticker.innerHTML = ''; // Clear previous content
-        ticker.classList.remove('is-paused-by-button'); // Reset button pause state on re-render
-        playButton.style.display = 'none';
-        pauseButton.style.display = 'inline-block';
-        isPausedByButton = false;
-
 
         if (!stocks || !stocks.length) {
             ticker.innerHTML = `<span style="color:#888;padding-left:10px;">No data available for ${marketSymbol}.</span>`;
-            // Hide controls if no data? Or keep them visible but non-functional?
-            // Let's hide them for now if no data.
-            controls.style.display = 'none';
+            // Controls are already removed, no need to hide them
             return;
-        } else {
-             controls.style.display = 'flex'; // Show controls if data is available
         }
 
         // Generate HTML for each stock item
@@ -436,19 +311,18 @@
         requestAnimationFrame(() => {
             // Ensure the element is in the DOM and has calculated width
             if (ticker.scrollWidth > 0) {
-                 // totalScrollWidth is the width of the *single* set of ticker items
-                 const totalScrollWidth = ticker.scrollWidth / 2;
-                 // animation.duration is the time to scroll exactly halfway (one full set of items)
-                 const duration = totalScrollWidth / SCROLL_SPEED_PPS; // Duration in seconds
+                // totalScrollWidth is the width of the *single* set of ticker items
+                const totalScrollWidth = ticker.scrollWidth / 2;
+                // animation.duration is the time to scroll exactly halfway (one full set of items)
+                const duration = totalScrollWidth / SCROLL_SPEED_PPS; // Duration in seconds
 
-                 // Apply animation
-                 // Set animation-duration in CSS to allow JS control via Animation API
-                 ticker.style.animation = `scroll-left ${duration}s linear infinite`;
+                // Apply animation
+                ticker.style.animation = `scroll-left ${duration}s linear infinite`;
 
             } else {
-                 // Handle case where scrollWidth is 0
-                 console.warn('Ticker scrollWidth is 0, animation skipped.');
-                 ticker.style.animation = 'none';
+                // Handle case where scrollWidth is 0
+                console.warn('Ticker scrollWidth is 0, animation skipped.');
+                ticker.style.animation = 'none';
             }
         });
     }
@@ -470,12 +344,6 @@
         // Display loading state
         ticker.innerHTML = `<span style="color:#888;padding-left:10px;">Loading ${marketName} data...</span>`;
         ticker.style.animation = 'none'; // Stop animation while loading
-        ticker.classList.remove('is-paused-by-button'); // Reset pause state
-        playButton.style.display = 'none';
-        pauseButton.style.display = 'inline-block';
-        isPausedByButton = false;
-        controls.style.display = 'flex'; // Show controls during loading
-
 
         try {
             const res = await fetch(`${API_BASE_URL}${marketSymbol}`);
@@ -493,11 +361,6 @@
             // Display error message
             ticker.innerHTML = `<span style="color:red;padding-left:10px;">Error loading data for ${marketName}: ${err.message}</span>`;
             ticker.style.animation = 'none'; // Ensure animation is stopped on error
-            ticker.classList.remove('is-paused-by-button'); // Reset pause state
-            playButton.style.display = 'none';
-            pauseButton.style.display = 'inline-block';
-            isPausedByButton = false; // Ensure state is reset even on error
-            controls.style.display = 'flex'; // Keep controls visible on error? Or hide? Let's keep them.
             cachedData = null; // Clear cache on error
         }
     }
