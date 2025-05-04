@@ -4,8 +4,9 @@
  * This script fetches live intraday market data for a specified PSX index
  * from the RipeInsight API and displays it as a scrolling ticker.
  * Elements are arranged horizontally, includes index name in a box,
- * "Source/Powered by" note below the name, and scrolls automatically.
- * Pause, Back, and Forward buttons have been removed as requested.
+ * and scrolls automatically. The "Source/Powered by" note is positioned
+ * at the bottom center, *outside* the main widget box. Pause, Back,
+ * and Forward buttons have been removed as requested.
  *
  * Usage: Include this script on your page. The index can be specified using
  * a 'data-market' attribute on the script tag (e.g., <script src="psx-ticker.js" data-market="KMIALL"></script>).
@@ -25,14 +26,14 @@
     const API_BASE_URL = 'https://api.ripeinsight.com/psx/v1/intraday_market_watch/';
     const DEFAULT_MARKET = 'KSE30';
     const SCROLL_SPEED_PPS = 100; // Pixels per second - adjust to change scroll speed
-    const REFRESH_INTERVAL = 60000; // Refresh data every 1 minute (adjust as needed)
+    const REFRESH_INTERVAL = 19900; // Refresh data every 1 minute (adjust as needed)
 
     // Map market symbols to full names (add more as needed)
     const MARKET_NAMES = {
         'KSE30': 'KSE 30 Index',
         'KSE100': 'KSE 100 Index',
         'KMIALL': 'KMI All Share Index',
-        'PSXALL': 'PSX All Share Index',
+        'ALLSHR': 'PSX All Share Index',
         // Add other indices here: 'SYMBOL': 'Full Name',
     };
 
@@ -58,22 +59,22 @@
         fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif',
         fontSize: '16px',
         boxSizing: 'border-box',
-        padding: '6px 10px', // Padding inside the container
-        position: 'relative',
-        minHeight: '50px', // Adjusted min-height to accommodate two lines on the left
+        padding: '6px 10px', // Reset padding, footer note is outside
+        position: 'relative', // Keep for wrapper hover pause
+        minHeight: '50px', // Adjusted min-height
         color: '#333', // Default text color
         display: 'flex', // Use flexbox for layout
         alignItems: 'center', // Vertically align items in the row (titleArea, ticker)
         gap: '10px', // Gap between main flex items
     });
 
-    // --- Container for Title and Powered By Note ---
+    // --- Container for Title ---
     const titleArea = document.createElement('div');
     titleArea.className = 'ticker-title-area';
     Object.assign(titleArea.style, {
         display: 'flex',
-        flexDirection: 'column', // Stack children (title, note) vertically
-        alignItems: 'flex-start', // Align title and note to the left
+        flexDirection: 'column', // Stack children (title) vertically
+        alignItems: 'flex-start', // Align title to the left
         flexShrink: 0, // Prevent shrinking
         flexGrow: 0, // Prevent growing
     });
@@ -95,17 +96,6 @@
         lineHeight: '1.2', // Adjust line height
     });
     titleArea.appendChild(indexTitle); // Add to titleArea
-
-    // --- Add Powered By Note (below the index name) ---
-    const poweredNote = document.createElement('div');
-    poweredNote.className = 'powered-note';
-    poweredNote.innerHTML = `Source: PSX, <a href="https://ripeinsight.com" target="_blank" rel="noopener noreferrer">Powered by RipeInsight</a>`;
-    Object.assign(poweredNote.style, {
-        fontSize: '11px', // Slightly smaller font size
-        color: '#888', // Muted color
-        marginTop: '4px', // Space between title box and note
-    });
-    titleArea.appendChild(poweredNote); // Add to titleArea
 
 
     // --- Create Ticker Wrapper (for scrolling content) ---
@@ -133,41 +123,17 @@
     tickerWrapper.appendChild(ticker); // Append ticker to the wrapper
 
     // --- Navigation Controls (Removed) ---
-    // The following code block for creating controls has been removed:
-    /*
-    const controls = document.createElement('div');
-    controls.className = 'ticker-controls';
-    Object.assign(controls.style, {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '5px', // Space between buttons
-        flexShrink: 0, // Prevent shrinking
-        flexGrow: 0, // Prevent growing
-        alignSelf: 'center', // Vertically center the controls within the container
-    });
-    container.appendChild(controls);
+    // ... (Code for buttons and event listeners removed) ...
 
-    // Backward Button (Removed)
-    const backwardButton = document.createElement('button');
-    // ... styling and appending removed ...
-    controls.appendChild(backwardButton);
+    // --- Add Powered By Note (at the bottom center, outside the main box) ---
+    const footerNoteArea = document.createElement('div');
+    footerNoteArea.className = 'ticker-footer-note'; // Class for styling the outer container
 
-    // Play Button (Removed)
-    const playButton = document.createElement('button');
-    // ... styling and appending removed ...
-    controls.appendChild(playButton);
-
-    // Pause Button (Removed)
-    const pauseButton = document.createElement('button');
-    // ... styling and appending removed ...
-    controls.appendChild(pauseButton);
-
-    // Forward Button (Removed)
-    const forwardButton = document.createElement('button');
-    // ... styling and appending removed ...
-    controls.appendChild(forwardButton);
-    */
-
+    const poweredNote = document.createElement('div');
+    poweredNote.className = 'powered-note'; // Keep original class for text styling
+    poweredNote.innerHTML = `Source: PSX, <a href="https://ripeinsight.com" target="_blank" rel="noopener noreferrer">Powered by RipeInsight</a>`;
+    // No inline styles needed, using CSS classes
+    footerNoteArea.appendChild(poweredNote); // Add to the new footer area
 
     // --- Inject Styles ---
     const styleTag = document.createElement('style');
@@ -175,6 +141,12 @@
         @keyframes scroll-left {
             0% { transform: translateX(0); }
             100% { transform: translateX(-50%); }
+        }
+
+        .ripeinsight-psx-ticker {
+            /* Styles for the main ticker box */
+            position: relative; /* Keep if needed for wrapper hover pause */
+            padding: 6px 10px; /* Standard padding */
         }
 
         .ripeinsight-psx-ticker .ticker-item {
@@ -203,63 +175,79 @@
 
         /* Hover Pause: Pause animation when mouse is over the wrapper */
         .ripeinsight-psx-ticker .ticker-wrapper:hover .ticker {
-            animation-play-state: paused; /* Removed !important as button override is gone */
+            animation-play-state: paused;
         }
 
-        /* Removed .is-paused-by-button styles */
+        /* Styling for the footer note container *outside* the main box */
+        .ticker-footer-note {
+            display: block; /* Ensure it's a block element */
+            width: 100%; /* Takes full width to center text */
+            text-align: center; /* Centers inline content (the poweredNote div) */
+            margin-top: 4px; /* Space between ticker box and note */
+            box-sizing: border-box;
+            padding: 0 10px; /* Add horizontal padding to prevent text touching edges */
+        }
 
-        .ripeinsight-psx-ticker .powered-note a {
+        /* Styling for the text inside the footer note */
+        .powered-note {
+            font-size: 11px; /* Slightly smaller font size */
+            color: #888; /* Muted color */
+        }
+
+        .powered-note a {
             text-decoration: none;
             color: inherit;
         }
 
-        .ripeinsight-psx-ticker .powered-note a:hover {
+        .powered-note a:hover {
             text-decoration: underline;
         }
+
 
         /* Responsive Adjustments */
         @media (max-width: 768px) {
              .ripeinsight-psx-ticker { padding: 6px 8px; gap: 8px; }
              .ripeinsight-psx-ticker .ticker-item { margin-right: 40px; }
              .ripeinsight-psx-ticker .ticker-index-title { font-size: 0.85em; padding: 3px 6px; }
-             .ripeinsight-psx-ticker .powered-note { font-size: 10px; margin-top: 3px; }
+             .ticker-footer-note { padding: 0 8px; } /* Adjust padding */
          }
 
-         /* On smaller screens, stack vertically for better usability */
-         /* Adjusted breakpoint and styles for the new titleArea */
-         @media (max-width: 600px) { /* Adjusted breakpoint */
-              .ripeinsight-psx-ticker { flexDirection: column; alignItems: flex-start; padding: 8px 10px; gap: 8px; } /* Removed extra bottom padding */
-              .ripeinsight-psx-ticker .title-area { flexShrink: 0; flexGrow: 0; width: 100%; alignItems: flex-start; }
-              .ripeinsight-psx-ticker .ticker-index-title { margin-bottom: 4px; font-size: 0.9em; padding: 4px 8px; }
-              .ripeinsight-psx-ticker .powered-note { margin-top: 0; font-size: 11px;} /* Reduce margin when stacked */
-              .ripeinsight-psx-ticker .ticker-wrapper { width: 100%; minWidth: auto; alignSelf: auto;} /* Allow wrapper to take full width, remove center alignment */
-              /* Removed styles for .ripeinsight-psx-ticker .ticker-controls */
-              .ripeinsight-psx-ticker .ticker-item { margin-right: 30px; font-size: 1em; }
+         /* On smaller screens, stack vertically */
+         @media (max-width: 600px) {
+              .ripeinsight-psx-ticker {
+                 flexDirection: column;
+                 alignItems: flex-start;
+                 padding: 8px 10px;
+                 gap: 8px;
+             }
+              .ripeinsight-psx-ticker .ticker-index-title { margin-bottom: 0; font-size: 0.9em; padding: 4px 8px; }
+             /* The footer note remains block and centered */
+              .ticker-footer-note {
+                  margin-top: 4px; /* Keep consistent margin */
+                  padding: 0 10px; /* Keep consistent padding */
+             }
          }
     `;
     document.head.appendChild(styleTag);
 
 
     // --- Insert Widget into the DOM ---
-    // Insert before the script tag itself if possible, otherwise append to body
+    // Insert the main container before the script tag
     if (scriptTag?.parentNode) {
         scriptTag.parentNode.insertBefore(container, scriptTag);
     } else {
         document.body.appendChild(container);
     }
 
-    // --- Control Button Event Listeners (Removed) ---
-    // The following event listeners have been removed:
-    /*
-    playButton.addEventListener('click', () => { ... });
-    pauseButton.addEventListener('click', () => { ... });
-    backwardButton.addEventListener('click', () => { ... });
-    forwardButton.addEventListener('click', () => { ... });
-    */
+    // Insert the footer note area immediately after the main container
+    if (container.parentNode) {
+        container.parentNode.insertBefore(footerNoteArea, container.nextSibling);
+    } else {
+        // Fallback if container couldn't be inserted before script
+        document.body.appendChild(footerNoteArea); // Appends at the very end
+        console.warn("Could not insert footer note immediately after ticker container. Appending to body.");
+    }
 
-    // --- Hover Logic (Handled by CSS) ---
-    // The CSS rule .ticker-wrapper:hover .ticker handles pausing on hover.
-    // Button pause logic and the associated class have been removed.
 
     /**
      * Renders the stock data into the ticker element.
@@ -274,7 +262,6 @@
 
         if (!stocks || !stocks.length) {
             ticker.innerHTML = `<span style="color:#888;padding-left:10px;">No data available for ${marketSymbol}.</span>`;
-            // Controls are already removed, no need to hide them
             return;
         }
 
